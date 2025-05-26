@@ -1,0 +1,7 @@
+CREATE TABLE books (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(50) NOT NULL,
+    author VARCHAR(50) NOT NULL,
+    isbn VARCHAR(13) UNIQUE NOT NULL,
+    available BOOLEAN NOT NULL DEFAULT TRUE
+);
