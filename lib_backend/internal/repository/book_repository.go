@@ -121,7 +121,7 @@ func (r *bookRepositoryImpl) GetAllBooks() ([]model.Book, error) {
 		}
 	}()
 
-	var books []model.Book
+	books := make([]model.Book, 0)
 
 	for rows.Next() {
 		book := model.Book{}
