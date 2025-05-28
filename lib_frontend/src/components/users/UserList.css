@@ -1,0 +1,39 @@
+.user-list-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+    padding: 10px;
+    justify-items: center;
+}
+
+.loading-container {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 50px;
+    color: #6a5acd;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.error-message,
+.no-items-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #666;
+    margin-top: 30px;
+    font-style: italic;
+    padding: 15px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    color: #721c24;
+}
+
+.no-items-message {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
