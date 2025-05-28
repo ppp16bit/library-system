@@ -1,11 +1,13 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"lib_backend/internal/model"
 	"lib_backend/internal/repository"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type UserService interface {
@@ -27,7 +29,6 @@ func NewUserService(userRepo repository.UserRepository) UserService {
 
 func (s *userServiceImpl) CreateUser(user *model.User) (*model.User, error) {
 	existingUser, err := s.userRepo.GetUserByEmail(user.Email)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to check for existing user by email: %w", err)
 	}
@@ -39,6 +40,15 @@ func (s *userServiceImpl) CreateUser(user *model.User) (*model.User, error) {
 	err = s.userRepo.CreateUser(user)
 
 	if err != nil {
+		// postgres error
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+
+			if pqErr.Code == "23505" && pqErr.Constraint == "users_registration_key" {
+				return nil, fmt.Errorf("user with registration %s already exists", user.Registration)
+			}
+		}
+
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
