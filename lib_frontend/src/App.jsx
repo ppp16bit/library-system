@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import BookList from './components/books/BookList';
 import BookForm from './components/books/BookForm';
@@ -8,7 +8,6 @@ import LoanList from './components/loans/LoanList';
 import LoanForm from './components/loans/LoanForm';
 import axios from 'axios';
 import { API_BASE_URL } from './constants';
-
 import { CSSTransition } from 'react-transition-group';
 
 function App() {
@@ -17,13 +16,58 @@ function App() {
   const [bookToEdit, setBookToEdit] = useState(null);
   const [userToEdit, setUserToEdit] = useState(null);
   const [loanToEdit, setLoanToEdit] = useState(null);
-
-  const bookListRef = useRef(null);
+  const [books, setBooks] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [loans, setLoans] = useState([]);
+  const bookListDivRef = useRef(null);
   const bookFormRef = useRef(null);
-  const userListRef = useRef(null);
+  const userListDivRef = useRef(null);
   const userFormRef = useRef(null);
-  const loanListRef = useRef(null);
+  const loanListDivRef = useRef(null);
   const loanFormRef = useRef(null);
+
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/books`, {
+        validateStatus: (status) => status >= 200 && status < 300 || status === 204
+      });
+      setBooks(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar livros:", error);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/users`, {
+        validateStatus: (status) => status >= 200 && status < 300 || status === 204
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar usuários:", error);
+    }
+  };
+
+  const fetchLoans = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/loans`, {
+        validateStatus: (status) => status >= 200 && status < 300 || status === 204
+      });
+      setLoans(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar empréstimos:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentView === 'books') {
+      fetchBooks();
+    } else if (currentView === 'users') {
+      fetchUsers();
+    } else if (currentView === 'loans') {
+      fetchLoans();
+    }
+  }, [currentView]);
 
   const handleSaveBook = async (bookData) => {
     try {
@@ -36,9 +80,7 @@ function App() {
       }
       setShowForm(false);
       setBookToEdit(null);
-      if (bookListRef.current) {
-        bookListRef.current.fetchBooks();
-      }
+      fetchBooks();
     } catch (error) {
       console.error("Erro ao salvar livro:", error.response ? error.response.data : error.message);
       alert('Erro ao salvar livro: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
@@ -53,11 +95,11 @@ function App() {
   const handleDeleteBook = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este livro?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/books/${id}`);
+        await axios.delete(`${API_BASE_URL}/books/${id}`, {
+          validateStatus: (status) => status === 200 || status === 204
+        });
         alert('Livro deletado com sucesso!');
-        if (bookListRef.current) {
-          bookListRef.current.fetchBooks();
-        }
+        fetchBooks();
       } catch (error) {
         console.error("Erro ao deletar livro:", error.response ? error.response.data : error.message);
         alert('Erro ao deletar livro: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
@@ -76,9 +118,7 @@ function App() {
       }
       setShowForm(false);
       setUserToEdit(null);
-      if (userListRef.current) {
-        userListRef.current.fetchUsers();
-      }
+      fetchUsers();
     } catch (error) {
       console.error("Erro ao salvar usuário:", error.response ? error.response.data : error.message);
       alert('Erro ao salvar usuário: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
@@ -93,14 +133,14 @@ function App() {
   const handleDeleteUser = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este usuário?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/users/${id}`);
+        await axios.delete(`${API_BASE_URL}/users/${id}`, {
+          validateStatus: (status) => status === 200 || status === 204
+        });
         alert('Usuário deletado com sucesso!');
-        if (userListRef.current) {
-          userListRef.current.fetchUsers();
-        }
+        fetchUsers();
       } catch (error) {
         console.error("Erro ao deletar usuário:", error.response ? error.response.data : error.message);
-        alert('Erro ao deletar usuário: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
+        alert('Erro ao deletar usuário: ' + (error.response?.data?.message || error.message || 'Verifique o console para mais detalhes.'));
       }
     }
   };
@@ -116,9 +156,7 @@ function App() {
       }
       setShowForm(false);
       setLoanToEdit(null);
-      if (loanListRef.current) {
-        loanListRef.current.fetchLoans();
-      }
+      fetchLoans();
     } catch (error) {
       console.error("Erro ao salvar empréstimo:", error.response ? error.response.data : error.message);
       alert('Erro ao salvar empréstimo: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
@@ -133,11 +171,11 @@ function App() {
   const handleDeleteLoan = async (id) => {
     if (window.confirm('Tem certeza que deseja deletar este empréstimo?')) {
       try {
-        await axios.delete(`${API_BASE_URL}/loans/${id}`);
+        await axios.delete(`${API_BASE_URL}/loans/${id}`, {
+          validateStatus: (status) => status === 200 || status === 204
+        });
         alert('Empréstimo deletado com sucesso!');
-        if (loanListRef.current) {
-          loanListRef.current.fetchLoans();
-        }
+        fetchLoans();
       } catch (error) {
         console.error("Erro ao deletar empréstimo:", error.response ? error.response.data : error.message);
         alert('Erro ao deletar empréstimo: ' + (error.response?.data?.message || 'Verifique o console para mais detalhes.'));
@@ -145,12 +183,14 @@ function App() {
     }
   };
 
-
   const handleCancelForm = () => {
     setShowForm(false);
     setBookToEdit(null);
     setUserToEdit(null);
     setLoanToEdit(null);
+    if (currentView === 'books') fetchBooks();
+    if (currentView === 'users') fetchUsers();
+    if (currentView === 'loans') fetchLoans();
   };
 
   const handleAddButton = () => {
@@ -229,7 +269,7 @@ function App() {
       </CSSTransition>
 
       <CSSTransition
-        in={showForm && currentView === 'loans'} // <<< Transição para LoanForm
+        in={showForm && currentView === 'loans'}
         timeout={300}
         classNames="fade"
         unmountOnExit
@@ -244,17 +284,16 @@ function App() {
         </div>
       </CSSTransition>
 
-
-      {/* Condicional para renderizar a lista apropriada */}
       <CSSTransition
         in={!showForm && currentView === 'books'}
         timeout={300}
         classNames="fade"
         unmountOnExit
-        nodeRef={bookListRef}
+        nodeRef={bookListDivRef}
       >
-        <div ref={bookListRef}>
+        <div ref={bookListDivRef}>
           <BookList
+            books={books}
             onEditBook={handleEditBook}
             onDeleteBook={handleDeleteBook}
           />
@@ -266,10 +305,11 @@ function App() {
         timeout={300}
         classNames="fade"
         unmountOnExit
-        nodeRef={userListRef}
+        nodeRef={userListDivRef}
       >
-        <div ref={userListRef}>
+        <div ref={userListDivRef}>
           <UserList
+            users={users}
             onEditUser={handleEditUser}
             onDeleteUser={handleDeleteUser}
           />
@@ -281,10 +321,11 @@ function App() {
         timeout={300}
         classNames="fade"
         unmountOnExit
-        nodeRef={loanListRef}
+        nodeRef={loanListDivRef}
       >
-        <div ref={loanListRef}>
+        <div ref={loanListDivRef}>
           <LoanList
+            loans={loans}
             onEditLoan={handleEditLoan}
             onDeleteLoan={handleDeleteLoan}
           />
