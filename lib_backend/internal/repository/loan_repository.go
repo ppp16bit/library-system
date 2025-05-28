@@ -176,7 +176,7 @@ func (r *loanRepositoryImpl) GetAllLoans() ([]model.Loan, error) {
 		}
 	}()
 
-	var loans []model.Loan
+	loans := make([]model.Loan, 0)
 
 	for rows.Next() {
 		loan := model.Loan{}

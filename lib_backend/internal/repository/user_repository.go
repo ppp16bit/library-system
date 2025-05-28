@@ -30,6 +30,8 @@ func NewUserRepository(db *sql.DB) UserRepository {
 func (r *userRepositoryImpl) CreateUser(user *model.User) error {
 	user.ID = uuid.New()
 
+	user.Registration = uuid.New().String()
+
 	query := `INSERT INTO users (id, name, registration, email) VALUES ($1, $2, $3, $4)`
 	_, err := r.db.Exec(query, user.ID, user.Name, user.Registration, user.Email)
 
@@ -121,7 +123,7 @@ func (r *userRepositoryImpl) GetAllUsers() ([]model.User, error) {
 		}
 	}()
 
-	var users []model.User
+	users := make([]model.User, 0)
 
 	for rows.Next() {
 		user := model.User{}
