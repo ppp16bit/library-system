@@ -32,8 +32,7 @@ func main() {
 	corsConfig := cors.DefaultConfig()
 
 	corsConfig.AllowOrigins = []string{
-		"http://localhost:3000",
-		"http://192.168.1.14:3000",
+		"http://localhost:5173",
 	}
 
 	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
