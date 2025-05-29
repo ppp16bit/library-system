@@ -1,4 +1,3 @@
-// src/components/LoanForm.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from "../../constants";
@@ -6,6 +5,7 @@ import './LoanForm.css';
 
 const LoanForm = ({ loanToEdit, onSubmit, onCancel }) => {
     const [loan, setLoan] = useState({
+        id: '',
         userId: '',
         bookId: '',
         loanDate: new Date().toISOString().substring(0, 16),
@@ -21,13 +21,13 @@ const LoanForm = ({ loanToEdit, onSubmit, onCancel }) => {
         const fetchUsersAndBooks = async () => {
             try {
                 const [usersResponse, booksResponse] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/users`),
-                    axios.get(`${API_BASE_URL}/books`)
+                    axios.get(`${API_BASE_URL}/users`, { validateStatus: s => s >= 200 && s < 300 || s === 204 }),
+                    axios.get(`${API_BASE_URL}/books`, { validateStatus: s => s >= 200 && s < 300 || s === 204 })
                 ]);
                 setUsers(usersResponse.data);
                 setBooks(booksResponse.data);
             } catch (err) {
-                console.error("Erro ao carregar usuários ou livros:", err);
+                console.error("Erro ao carregar usuários ou livros:", err.response ? err.response.data : err.message);
                 setErrors({ general: "Não foi possível carregar usuários ou livros para o formulário." });
             } finally {
                 setLoadingData(false);
@@ -39,12 +39,16 @@ const LoanForm = ({ loanToEdit, onSubmit, onCancel }) => {
     useEffect(() => {
         if (loanToEdit) {
             setLoan({
-                ...loanToEdit,
-                loanDate: loanToEdit.loanDate ? new Date(loanToEdit.loanDate).toISOString().substring(0, 16) : '',
-                returnDate: loanToEdit.returnDate ? new Date(loanToEdit.returnDate).toISOString().substring(0, 16) : ''
+                id: loanToEdit.id || '',
+                userId: loanToEdit.user_id || '',
+                bookId: loanToEdit.book_id || '',
+                loanDate: loanToEdit.loaned_at ? new Date(loanToEdit.loaned_at).toISOString().substring(0, 16) : '',
+                returnDate: loanToEdit.returned_at ? new Date(loanToEdit.returned_at).toISOString().substring(0, 16) : '',
+                returned: loanToEdit.returned || false
             });
         } else {
             setLoan({
+                id: '',
                 userId: '',
                 bookId: '',
                 loanDate: new Date().toISOString().substring(0, 16),
@@ -80,9 +84,12 @@ const LoanForm = ({ loanToEdit, onSubmit, onCancel }) => {
         e.preventDefault();
         if (validate()) {
             const loanDataToSend = {
-                ...loan,
-                loanDate: loan.loanDate ? new Date(loan.loanDate).toISOString() : '',
-                returnDate: loan.returnDate ? new Date(loan.returnDate).toISOString() : null
+                ...(loan.id && { id: loan.id }),
+                user_id: loan.userId,
+                book_id: loan.bookId,
+                loaned_at: loan.loanDate ? new Date(loan.loanDate).toISOString() : '',
+                returned: loan.returned,
+                ...(loan.returnDate && { returned_at: new Date(loan.returnDate).toISOString() })
             };
             onSubmit(loanDataToSend);
         }
