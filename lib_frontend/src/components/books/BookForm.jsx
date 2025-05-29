@@ -3,24 +3,41 @@ import './BookForm.css';
 
 const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
   const [book, setBook] = useState({
+    id: '',
     title: '',
     author: '',
-    isbn: ''
+    isbn: '',
+    available: true
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (bookToEdit) {
-      setBook(bookToEdit);
+      setBook({
+        id: bookToEdit.id || '',
+        title: bookToEdit.title || '',
+        author: bookToEdit.author || '',
+        isbn: bookToEdit.isbn || '',
+        available: bookToEdit.available
+      });
     } else {
-      setBook({ title: '', author: '', isbn: '' });
+      setBook({
+        id: '',
+        title: '',
+        author: '',
+        isbn: '',
+        available: true
+      });
     }
     setErrors({});
   }, [bookToEdit]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setBook(prevBook => ({ ...prevBook, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setBook(prevBook => ({
+      ...prevBook,
+      [name]: type === 'checkbox' ? checked : value
+    }));
     setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
   };
 
@@ -29,6 +46,9 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
     if (!book.title.trim()) newErrors.title = 'Título é obrigatório.';
     if (!book.author.trim()) newErrors.author = 'Autor é obrigatório.';
     if (!book.isbn.trim()) newErrors.isbn = 'ISBN é obrigatório.';
+    else if (!/^\d{10}(\d{3})?$/.test(book.isbn)) {
+      newErrors.isbn = 'ISBN deve ter 10 ou 13 dígitos numéricos.';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,6 +103,20 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
           />
           {errors.isbn && <p className="error-text">{errors.isbn}</p>}
         </div>
+
+        {bookToEdit && (
+          <div className="form-group form-checkbox-group">
+            <input
+              type="checkbox"
+              id="available"
+              name="available"
+              checked={book.available}
+              onChange={handleChange}
+            />
+            <label htmlFor="available">Disponível para Empréstimo?</label>
+          </div>
+        )}
+
         <div className="form-actions">
           <button type="submit" className="submit-button">
             {bookToEdit ? 'Salvar Alterações' : 'Adicionar Livro'}
