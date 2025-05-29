@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"lib_backend/internal/model"
 	"lib_backend/internal/repository"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -26,20 +27,26 @@ func NewBookService(bookRepo repository.BookRepository) BookService {
 }
 
 func (s *bookServiceImpl) CreateBook(book *model.Book) (*model.Book, error) {
-	existingBook, err := s.bookRepo.GetBookByISBN(book.Isbn)
+	if book.ID == uuid.Nil {
+		newID := uuid.New()
+		book.ID = newID
+		log.Printf("Gerado novo UUID para o livro: %s", newID.String())
+	} else {
+		log.Printf("ID do livro recebido (não nulo): %s", book.ID.String())
+	}
 
+	existingBook, err := s.bookRepo.GetBookByISBN(book.Isbn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to check for existing book by ISBN: %w", err)
+		return nil, fmt.Errorf("falha ao verificar livro existente por ISBN: %w", err)
 	}
 
 	if existingBook != nil {
-		return nil, fmt.Errorf("book with ISBN %s already exists", book.Isbn)
+		return nil, fmt.Errorf("livro com ISBN %s já existe", book.Isbn)
 	}
 
 	err = s.bookRepo.CreateBook(book)
-
 	if err != nil {
-		return nil, fmt.Errorf("failed to create book: %w", err)
+		return nil, fmt.Errorf("falha ao criar livro: %w", err)
 	}
 
 	return book, nil
