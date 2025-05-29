@@ -3,41 +3,24 @@ import './BookForm.css';
 
 const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
   const [book, setBook] = useState({
-    id: '',
     title: '',
     author: '',
-    isbn: '',
-    available: true
+    isbn: ''
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (bookToEdit) {
-      setBook({
-        id: bookToEdit.id || '',
-        title: bookToEdit.title || '',
-        author: bookToEdit.author || '',
-        isbn: bookToEdit.isbn || '',
-        available: bookToEdit.available
-      });
+      setBook(bookToEdit);
     } else {
-      setBook({
-        id: '',
-        title: '',
-        author: '',
-        isbn: '',
-        available: true
-      });
+      setBook({ title: '', author: '', isbn: '' });
     }
     setErrors({});
   }, [bookToEdit]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setBook(prevBook => ({
-      ...prevBook,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    const { name, value } = e.target;
+    setBook(prevBook => ({ ...prevBook, [name]: value }));
     setErrors(prevErrors => ({ ...prevErrors, [name]: '' }));
   };
 
@@ -55,9 +38,7 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validate()) {
-      onSubmit(book);
-    }
+    onSubmit(book);
   };
 
   return (
@@ -103,19 +84,6 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
           />
           {errors.isbn && <p className="error-text">{errors.isbn}</p>}
         </div>
-
-        {bookToEdit && (
-          <div className="form-group form-checkbox-group">
-            <input
-              type="checkbox"
-              id="available"
-              name="available"
-              checked={book.available}
-              onChange={handleChange}
-            />
-            <label htmlFor="available">Disponível para Empréstimo?</label>
-          </div>
-        )}
 
         <div className="form-actions">
           <button type="submit" className="submit-button">
