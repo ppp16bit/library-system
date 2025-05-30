@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"lib_backend/internal/dto"
 	"lib_backend/internal/model"
 	"lib_backend/internal/services"
 
@@ -20,31 +21,36 @@ func NewLoanHandler(s services.LoanService) *LoanHandler {
 }
 
 func (h *LoanHandler) CreateLoan(c *gin.Context) {
-	var loan model.Loan
+	var request dto.LoanRequest
 
-	if err := c.ShouldBindJSON(&loan); err != nil {
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body", "details": err.Error()})
 		return
 	}
 
-	createdLoan, err := h.loanService.CreateLoan(&loan)
+	parsedUserID := uuid.MustParse(request.UserID)
+	parsedBookID := uuid.MustParse(request.BookID)
+
+	loanToCreate := &model.Loan{
+		UserID:   parsedUserID,
+		BookID:   parsedBookID,
+		Returned: false,
+		LoanedAt: model.DefaultLoanedAt(),
+	}
+
+	createdLoan, err := h.loanService.CreateLoan(loanToCreate)
 
 	if err != nil {
-		log.Printf("ERROR: CreateLoan service failed: %v", err)
-
 		switch err.Error() {
-		case "service: user with ID " + loan.UserID.String() + " not found for loan":
+		case "user with ID " + parsedUserID.String() + " not found for loan":
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		case "service: book with ID " + loan.BookID.String() + " not found for loan":
-			c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
-		case "service: book with ID " + loan.BookID.String() + " is not available for loan":
+		case "book with ID " + parsedBookID.String() + " is not available for loan":
 			c.JSON(http.StatusConflict, gin.H{"error": "Book is not available for loan"})
 		default:
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create loan", "details": err.Error()})
 		}
 		return
 	}
-
 	c.JSON(http.StatusCreated, createdLoan)
 }
 

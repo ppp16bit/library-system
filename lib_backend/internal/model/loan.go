@@ -14,3 +14,7 @@ type Loan struct {
 	Returned   bool       `json:"returned"`
 	ReturnedAt *time.Time `json:"returned_at,omitempty"`
 }
+
+func DefaultLoanedAt() time.Time {
+	return time.Now()
+}
