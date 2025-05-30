@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
-func LoadEnv() {
+/*func LoadEnv() {
 
 	err := godotenv.Load()
 
 	if err != nil {
 		log.Println(".env not found")
 	}
-}
+}*/
 
 func SetupDB() (*sql.DB, error) {
-	LoadEnv()
+	//LoadEnv()
 
-	host := os.Getenv("HOST_DB")
-	port := os.Getenv("PORT_DB")
-	user := os.Getenv("USER_DB")
-	password := os.Getenv("PASSWORD_DB")
-	dbname := os.Getenv("NAME_DB")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+
+	log.Printf("DEBUG: Variables read by os.Getenv(): Host='%s', Port='%s', User='%s', Password='%s', DBName='%s'", host, port, user, password, dbname)
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)

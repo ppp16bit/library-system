@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	config.LoadEnv()
+	//config.LoadEnv()
 
 	db, err := config.SetupDB()
 	if err != nil {

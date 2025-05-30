@@ -21,4 +21,4 @@ EXPOSE 8080
 
 ENV GIN_MODE=release
 
-ENTRYPOINT ["./server"]
+ENTRYPOINT ["/bin/sh", "-c", "echo \"--- VARIAVEIS DE AMBIENTE DENTRO DO CONTAINER ---\" && env && echo \"-------------------------------------------------- \"; ./server"]
