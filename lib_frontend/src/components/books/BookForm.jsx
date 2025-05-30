@@ -5,7 +5,8 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
   const [book, setBook] = useState({
     title: '',
     author: '',
-    isbn: ''
+    isbn: '',
+    available: true
   });
   const [errors, setErrors] = useState({});
 
@@ -38,8 +39,15 @@ const BookForm = ({ bookToEdit, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(book);
-  };
+    const bookDataToSend = {
+        title: book.title,
+        author: book.author,
+        isbn: book.isbn,
+        available: true,
+    };
+    console.log('Payload do Livro para envio:', bookDataToSend);
+    onSubmit(bookDataToSend);
+};
 
   return (
     <div className="book-form-container">

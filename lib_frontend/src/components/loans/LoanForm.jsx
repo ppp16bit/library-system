@@ -84,13 +84,10 @@ const LoanForm = ({ loanToEdit, onSubmit, onCancel }) => {
         e.preventDefault();
         if (validate()) {
             const loanDataToSend = {
-                ...(loan.id && { id: loan.id }),
-                user_id: loan.userId,
-                book_id: loan.bookId,
-                loaned_at: loan.loanDate ? new Date(loan.loanDate).toISOString() : '',
-                returned: loan.returned,
-                ...(loan.returnDate && { returned_at: new Date(loan.returnDate).toISOString() })
+                userId: loan.userId,
+                bookId: loan.bookId,
             };
+            console.log('passou aqui:', loanDataToSend)
             onSubmit(loanDataToSend);
         }
     };
